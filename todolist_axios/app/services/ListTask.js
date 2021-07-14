@@ -22,10 +22,11 @@ DanhSachTasks.prototype.deleteTaskApi = function(id) {
     })
 }
 
-DanhSachTasks.prototype.updateTaskApi = function(id, tenTask) {
+
+DanhSachTasks.prototype.updateTaskApi = function(id, task) {
     return axios({
         url: `https://60e023f06b689e001788c900.mockapi.io/task/${id}`,
         method: 'PUT',
-        data: tenTask
+        data: task,
     })
 }

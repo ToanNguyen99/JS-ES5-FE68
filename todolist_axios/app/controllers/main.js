@@ -4,18 +4,31 @@ var validator = new Validator();
 var getEle = function(id) {
         return document.getElementById(id)
     }
-    // Lấy dữ liệu
+    // var isLoading = false;
+
+// var checkLoading = function() {
+//     if (isLoading == true)
+//         getEle('loading').style.display = 'block';
+//     else
+//         getEle('loading').style.display = 'none';
+// };
+// Lấy dữ liệu
 
 var getTask = function() {
+    // isLoading = true;
+    // checkLoading();
     ds.getTaskApi().then(function(res) {
-        console.log(res.data);
+        // console.log(res.data);
         renderListTask(res.data)
+        setLocalStorage(res.data)
+            // isLoading = true;
+            // checkLoading();
     }).catch(function(err) {
         console.log(err);
     })
 }
-getTask()
-    // Render task
+getTask();
+// Render task
 var renderListTask = function(ds) {
         var task_todo = '';
         var task_complete = '';
@@ -28,7 +41,7 @@ var renderListTask = function(ds) {
                                 <button class="remove" onclick="deleteTask('${dstask.id}')">
                                     <i class="fa fa-trash-alt"></i>
                                 </button>
-                                <button class="complete" onclick="capNhatTask('${dstask.tenTask}')">
+                                <button class="complete" onclick="updateTask('${dstask.id}')">
                                     <i class="far fa-check-circle"></i>
                                     <i class="fas fa-check-circle"></i>
                                 </button>
@@ -45,7 +58,7 @@ var renderListTask = function(ds) {
                                 <button class="remove" onclick="deleteTask('${dstask.id}')">
                                     <i class="fa fa-trash-alt"></i>
                                 </button>
-                                <button class="complete" onclick="capNhatTask('${dstask.tenTask}')">
+                                <button class="complete" onclick="updateTask('${dstask.id}')">
                                     <i class="far fa-check-circle"></i>
                                     <i class="fas fa-check-circle"></i>
                                 </button>
@@ -59,6 +72,8 @@ var renderListTask = function(ds) {
     }
     // Xóa task
 var deleteTask = function(id) {
+        // isLoading = true;
+        // checkLoading();
         ds.deleteTaskApi(id)
             .then(function(res) {
                 getTask();
@@ -67,18 +82,35 @@ var deleteTask = function(id) {
                 console.log(err);
             })
     }
-    // // Update task
-    // function capNhatTask(name) {
-    //     ds.capNhatTask(name);
-    //     renderListTask(ds.arr);
-    //     setLocalStorage();
+    // Update task
+function updateTask(id) {
+    // isLoading = true;
+    // checkLoading();
+    var listLocal = getLocalStorage();
+    var changeTask = new task;
+    listLocal.forEach(function(task) {
+        if (id == task.id) {
+            changeTask.tenTask = task.tenTask;
+            if (task.trangThai == 'todo') {
+                changeTask.trangThai = 'completed';
+            } else {
+                changeTask.trangThai = 'todo';
+            }
 
-// }
+        }
+    })
+    ds.updateTaskApi(id, changeTask)
+        .then(function(res) {
+            getTask();
+        }).catch(function(err) {
+            console.log(err);
+        })
+}
 // Check validator
 var validateInput = function(tenTask) {
     var isValid = true;
-
-    isValid &= validator.kiemTraRong(tenTask, 'notiInput', 'Tên Task không được để trống');
+    var listTask = getLocalStorage()
+    isValid &= validator.kiemTraRong(tenTask, 'notiInput', 'Tên Task không được để trống') && validator.kiemTraTrung(listTask, tenTask, 'notiInput', 'Task đã tồn tại');
     return isValid;
 }
 
@@ -86,6 +118,8 @@ var validateInput = function(tenTask) {
 // Thêm task
 
 getEle('addItem').addEventListener('click', function() {
+    // isLoading = true;
+    // checkLoading();
     var tenTask = getEle('newTask').value;
     var trangThai = 'todo';
 
@@ -105,13 +139,13 @@ getEle('addItem').addEventListener('click', function() {
 
 })
 
-// function getLocalStorage() {
-//     if (localStorage.getItem('DSTASK')) {
-//         ds.arr = JSON.parse(localStorage.getItem('DSTASK'))
-//         renderListTask(ds.arr);
-//     }
-// }
+function getLocalStorage() {
+    if (localStorage.getItem('DSTASK')) {
+        return JSON.parse(localStorage.getItem('DSTASK'))
+            // renderListTask(ds);
+    }
+}
 
-// function setLocalStorage() {
-//     localStorage.setItem('DSTASK', JSON.stringify(ds.arr))
-// }
+function setLocalStorage(DSTASK) {
+    localStorage.setItem('DSTASK', JSON.stringify(DSTASK))
+}
